@@ -28,6 +28,7 @@ void reset_game_save_data_extr(void) {
     data->extrMagic = EXTR_MAGIC;
 
     data->additionalLevelCount = TOTAL_LEVELS_ADDI;
+    data->additionalCampaignCount = TOTAL_PERFECT_CAMPAIGNS_ADDI;
     for (i = 0; i < TOTAL_LEVELS_ADDI; i++) {
         // store (u16)-1
         data->additionalLevel[i].uScore.asU8[0] = (u8)(DEFAULT_LEVEL_SCORE & 0xFF);

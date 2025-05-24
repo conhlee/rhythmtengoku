@@ -74,7 +74,11 @@ enum PerfectCampaignsEnum {
     /* 47 */ CAMPAIGN_BOUNCY_ROAD_2,
     /* <insert new campaigns here> */
 
-    /* -- */ TOTAL_PERFECT_CAMPAIGNS
+    /* -- */ TOTAL_PERFECT_CAMPAIGNS,
+
+    // CONHLEE: do not modify
+    /* -- */ TOTAL_PERFECT_CAMPAIGNS_ORIG = 48,
+    /* -- */ TOTAL_PERFECT_CAMPAIGNS_ADDI = TOTAL_PERFECT_CAMPAIGNS - TOTAL_PERFECT_CAMPAIGNS_ORIG
 };
 
 
@@ -174,5 +178,9 @@ enum RhythmGameLevelsEnum {
     /* 54 */ LEVEL_LIVE_MENU,
     /* <insert new levels here> */
 
-    /* -- */ TOTAL_LEVELS
+    /* -- */ TOTAL_LEVELS,
+
+    // CONHLEE: do not modify
+    /* -- */ TOTAL_LEVELS_ORIG = 55,
+    /* -- */ TOTAL_LEVELS_ADDI = TOTAL_LEVELS - TOTAL_LEVELS_ORIG
 };
