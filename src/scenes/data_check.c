@@ -155,7 +155,7 @@ void data_check_print_page(s32 id) {
     strcat(string, game_select_get_level_name(id));
     data_check_print_line(2, 0, string);
 
-    avgPoints = saveData->levelScores[id];
+    avgPoints = savedata_get_levelscore(saveData, id); // CONHLEE
 
     if (avgPoints == DEFAULT_LEVEL_SCORE) {
         memcpy(number, "---", 4);
@@ -173,9 +173,10 @@ void data_check_print_page(s32 id) {
 
     data_check_print_line(3, 0, string);
 
-    totalPlays = saveData->levelTotalPlays[id];
-    firstOK = saveData->levelFirstOK[id];
-    firstSuperb = saveData->levelFirstSuperb[id];
+    // CONHLEE
+    totalPlays = savedata_get_level_totalplays(saveData, id);
+    firstOK = savedata_get_level_firstok(saveData, id);
+    firstSuperb = savedata_get_level_firstsuperb(saveData, id);
 
     memcpy(string, "  ", 3);
     strcat(string, "—V‚ñ‚¾‰ñ” "); // Number of Times Played:

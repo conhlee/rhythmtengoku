@@ -112,7 +112,7 @@ void get_all_uncleared_campaigns(void) {
     notice->totalAvailable = 0;
 
     for (i = 0; i < TOTAL_PERFECT_CAMPAIGNS; i++) {
-        if (!D_030046a8->data.campaignsCleared[i]) {
+        if (!savedata_get_campaign_cleared(&D_030046a8->data, i)) { // CONHLEE
             if (get_level_state_from_grid_xy(gift->x, gift->y) == LEVEL_STATE_HAS_MEDAL) {
                 notice->indexes[notice->totalAvailable] = i;
                 notice->totalAvailable++;
@@ -207,7 +207,7 @@ void init_campaign_notice(void) {
         case CAMPAIGN_STATE_ACTIVE:
             if ((D_030046a8->data.campaignAttemptsLeft > 0)
              && (D_030046a8->data.unk26A < 3)
-             && (!D_030046a8->data.campaignsCleared[D_030046a8->data.currentCampaign])) {
+             && (!savedata_get_campaign_cleared(&D_030046a8->data, D_030046a8->data.currentCampaign))) { // CONHLEE
                 notice->id = D_030046a8->data.currentCampaign;
                 notice->x = campaign_gifts_table[notice->id].x;
                 notice->y = campaign_gifts_table[notice->id].y;
@@ -460,7 +460,7 @@ s32 get_level_state_from_id(s32 id) {
         return LEVEL_STATE_NULL;
     }
 
-    return saveData->levelStates[id];
+    return savedata_get_levelstate(saveData, id); // CONHLEE
 }
 
 
@@ -532,7 +532,7 @@ void init_game_select_grid_gfx(void) {
 
                 levelData = &level_data_table[levelID];
                 levelType = levelData->type;
-                levelState = saveData->levelStates[levelID];
+                levelState = savedata_get_levelstate(saveData, levelID); // CONHLEE
                 overlay = level_icon_overlays_map[levelType][levelState];
                 if (levelState != LEVEL_STATE_HIDDEN) {
                     tileNum = 1 + (levelData->icon * 3 * 3);
@@ -563,7 +563,7 @@ void save_level_state_from_grid_xy(s32 x, s32 y, s32 state) {
         id = game_select_grid_data[x + (y * GS_GRID_WIDTH)].id;
 
         if (id >= 0) {
-            saveData->levelStates[id] = state;
+            savedata_set_levelstate(saveData, id, state); // CONHLEE
         }
     }
 }
@@ -1327,7 +1327,7 @@ u32 game_select_check_level_event_req(s32 x, s32 y, s32 newState) {
         return FALSE;
     }
 
-    state = saveData->levelStates[gridEntry->id];
+    state = savedata_get_levelstate(saveData, gridEntry->id); // CONHLEE
     requirements = NULL;
 
     switch (state) {
@@ -1360,7 +1360,7 @@ u32 game_select_check_level_event_req(s32 x, s32 y, s32 newState) {
             return FALSE;
         }
 
-        state = saveData->levelStates[gridEntry->id];
+        state = savedata_get_levelstate(saveData, gridEntry->id); // CONHLEE
 
         switch (requirements[0]) {
             case LEVEL_STATE_HAS_MEDAL:
@@ -1412,7 +1412,7 @@ void game_select_set_icon_map_after_level_event(s32 x, s32 y) {
     tileY = 4 + (y * 3);
     levelData = &level_data_table[id];
     type = levelData->type;
-    state = saveData->levelStates[id];
+    state = savedata_get_levelstate(saveData, id); // CONHLEE
     overlay = level_icon_overlays_map[type][state];
 
     if ((state == LEVEL_STATE_HIDDEN) || (state == LEVEL_STATE_APPEARING)) {
@@ -1554,7 +1554,8 @@ u32 game_select_process_level_events(void) {
             play_sound(&s_f_clear_game_seqData);
 
             cafe_session_remove_level(id);
-            D_030046a8->data.levelFirstOK[id] = D_030046a8->data.levelTotalPlays[id];
+
+            savedata_update_level_firstok(&D_030046a8->data, id); // CONHLEE
             break;
 
         case LEVEL_STATE_HAS_MEDAL:
@@ -1568,9 +1569,11 @@ u32 game_select_process_level_events(void) {
             D_030046a8->data.totalMedals++;
             game_select_refresh_medal_count(127);
             cafe_session_remove_level(id);
-            D_030046a8->data.levelFirstSuperb[id] = D_030046a8->data.levelTotalPlays[id];
-            if (D_030046a8->data.levelFirstOK[id] == 0) {
-                D_030046a8->data.levelFirstOK[id] = D_030046a8->data.levelTotalPlays[id];
+
+            // CONHLEE
+            savedata_update_level_firstsuperb(&D_030046a8->data, id);
+            if (savedata_get_level_firstok(&D_030046a8->data, id) == 0) {
+                savedata_update_level_firstok(&D_030046a8->data, id);
             }
             break;
     }
@@ -1853,7 +1856,9 @@ void game_select_print_level_rank(s32 levelState) {
     struct Animation *anim;
     const char *string;
 
-    if (D_030046a8->data.levelScores[gGameSelect->infoPaneLevelID] == DEFAULT_LEVEL_SCORE) {
+    // CONHLEE
+    u16 score = savedata_get_levelscore(&D_030046a8->data, gGameSelect->infoPaneLevelID);
+    if (score == DEFAULT_LEVEL_SCORE) {
         levelState = LEVEL_STATE_OPEN;
     }
 
@@ -1903,7 +1908,7 @@ void game_select_process_info_pane(void) {
                 sprite_set_origin_x_y(gSpriteHandler, gGameSelect->infoPaneRank, &bgOfs->x, &bgOfs->y);
 
                 campaign = get_campaign_from_grid_xy(gGameSelect->cursorX, gGameSelect->cursorY);
-                if ((campaign >= 0) && D_030046a8->data.campaignsCleared[campaign]) {
+                if ((campaign >= 0) && savedata_get_campaign_cleared(&D_030046a8->data, campaign)) {
                     sprite_set_visible(gSpriteHandler, gGameSelect->perfectClearedSprite, TRUE);
                 }
 
@@ -1946,7 +1951,7 @@ u32 game_select_calculate_flow(u32 *modifierReq, u32 *averageReq) {
     u32 i;
 
     for (i = 0; i < TOTAL_LEVELS; i++) {
-        u32 score = saveData->levelScores[i];
+        u32 score = savedata_get_levelscore(saveData, i); // CONHLEE
 
         if (score != DEFAULT_LEVEL_SCORE) {
             totalGames++;
@@ -1988,7 +1993,7 @@ u32 game_select_calculate_flow_old(void) {
     u32 i;
 
     for (i = 0; i < TOTAL_LEVELS; i++) {
-        u32 score = saveData->levelScores[i];
+        u32 score = savedata_get_levelscore(saveData, i); // CONHLEE
 
         if (score != DEFAULT_LEVEL_SCORE) {
             totalGames++;
@@ -2049,7 +2054,8 @@ u32 game_select_update_scores(void) {
 
     // Save new score.
     if (levelID >= 0) {
-        score = saveData->levelScores[levelID];
+        // CONHLEE
+        score = savedata_get_levelscore(saveData, levelID);
 
         if (score == DEFAULT_LEVEL_SCORE) {
             // New scores have a weight of 100%.
@@ -2062,7 +2068,8 @@ u32 game_select_update_scores(void) {
             score = ((newScore + (score * 3)) / 4) & 0xFFFFFF;
         }
 
-        saveData->levelScores[levelID] = score;
+        // CONHLEE
+        savedata_set_levelscore(saveData, levelID, score);
     }
 
     saveData->recentLevelScore = DEFAULT_LEVEL_SCORE;
@@ -2074,10 +2081,11 @@ u32 game_select_update_scores(void) {
             u32 scoreBonus = (INT_TO_FIXED(prevModScore) / modifier) - average + 1;
 
             for (i = 0; i < TOTAL_LEVELS; i++) {
-                score = saveData->levelScores[i];
+                score = savedata_get_levelscore(saveData, i); // CONHLEE
 
                 if (score != DEFAULT_LEVEL_SCORE) {
-                    saveData->levelScores[i] = clamp_int32(score + scoreBonus, 0, MAX_LEVEL_SCORE);
+                    // CONHLEE
+                    savedata_set_levelscore(saveData, i, clamp_int32(score + scoreBonus, 0, MAX_LEVEL_SCORE));
                 }
             }
         }

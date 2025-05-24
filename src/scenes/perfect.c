@@ -60,7 +60,7 @@ void perfect_scene_start(void *sVar, s32 dArg) {
         giftType = campaign_gifts_table[gPerfect->campaignID].type;
         giftID = campaign_gifts_table[gPerfect->campaignID].id;
 
-        if (!D_030046a8->data.campaignsCleared[gPerfect->campaignID]) {
+        if (!savedata_get_campaign_cleared(&D_030046a8->data, gPerfect->campaignID)) { // CONHLEE
             switch (giftType) {
                 case CAMPAIGN_GIFT_SONG:
                     save_studio_song(giftID, -1, 1, 0);
@@ -76,7 +76,7 @@ void perfect_scene_start(void *sVar, s32 dArg) {
             }
 
             D_030046a8->data.totalPerfects++;
-            D_030046a8->data.campaignsCleared[gPerfect->campaignID] = TRUE;
+            savedata_set_campaign_cleared(&D_030046a8->data, gPerfect->campaignID, TRUE); // CONHLEE
 
             if (D_030046a8->data.totalPerfects == TOTAL_PERFECT_CAMPAIGNS) {
                 unlock_all_unassigned_campaign_gift_songs();

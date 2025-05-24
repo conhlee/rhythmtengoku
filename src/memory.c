@@ -111,6 +111,7 @@ void clear_save_data(void) {
 
 s32 copy_to_save_buffer(u8 *cartRAM) {
     struct SaveBuffer *buffer = D_030046a8;
+    u32 myChecksum;
 
     read_sram_fast(cartRAM, (u8 *)buffer, SAVE_BUFFER_SIZE);
 
@@ -118,8 +119,15 @@ s32 copy_to_save_buffer(u8 *cartRAM) {
         return 1;
     }
 
-    if ((generate_save_buffer_checksum((s32 *)D_030046a8, SAVE_BUFFER_SIZE) - buffer->header.checksum) != buffer->header.checksum) {
+    // CONHLEE
+    myChecksum = generate_save_buffer_checksum((s32 *)D_030046a8, SAVE_BUFFER_SIZE_ORIG) - buffer->header.checksum;
+    if (myChecksum != buffer->header.checksum) {
         return 2;
+    }
+
+    // CONHLEE: clear just the additional data; last thing we want is garbage here
+    if (buffer->data.extrMagic != EXTR_MAGIC) {
+        reset_game_save_data_extr();
     }
 
     return 0;
@@ -140,7 +148,7 @@ void flush_save_buffer(u8 *cartRAM) {
     struct SaveBuffer *buffer = D_030046a8;
 
     buffer->header.checksum = 0;
-    buffer->header.checksum = generate_save_buffer_checksum((s32 *)D_030046a8, SAVE_BUFFER_SIZE);
+    buffer->header.checksum = generate_save_buffer_checksum((s32 *)D_030046a8, SAVE_BUFFER_SIZE_ORIG); // CONHLEE
 
     write_sram_fast((u8 *)D_030046a8, cartRAM, SAVE_BUFFER_SIZE);
 }
@@ -156,7 +164,7 @@ void write_save_buffer_header_to_sram(u8 *cartRAM) {
     s32 bufferOffset = get_offset_from_save_buffer(buffer); // isn't this literally always 0
 
     buffer->header.checksum = 0;
-    buffer->header.checksum = generate_save_buffer_checksum((s32 *)D_030046a8, SAVE_BUFFER_SIZE);
+    buffer->header.checksum = generate_save_buffer_checksum((s32 *)D_030046a8, SAVE_BUFFER_SIZE_ORIG); // CONHLEE
 
     write_sram_fast((u8 *)D_030046a8 + bufferOffset, cartRAM + bufferOffset, 0x10);
 }

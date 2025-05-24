@@ -20,6 +20,32 @@ u32 get_music_base_tempo(struct SongHeader *seqData) {
     return 140;
 }
 
+// CONHLEE
+void reset_game_save_data_extr(void) {
+    struct TengokuSaveData *data = &D_030046a8->data;
+    u32 i;
+
+    data->extrMagic = EXTR_MAGIC;
+
+    data->additionalLevelCount = TOTAL_LEVELS_ADDI;
+    for (i = 0; i < TOTAL_LEVELS_ADDI; i++) {
+        // store (u16)-1
+        data->additionalLevel[i].uScore.asU8[0] = (u8)(DEFAULT_LEVEL_SCORE & 0xFF);
+        data->additionalLevel[i].uScore.asU8[1] = (u8)((DEFAULT_LEVEL_SCORE >> 8) & 0xFF);
+
+        data->additionalLevel[i].state = LEVEL_STATE_OPEN;
+
+        data->additionalLevel[i].totalPlays = 0;
+        data->additionalLevel[i].firstOK = 0;
+        data->additionalLevel[i].firstSuperb = 0;
+
+        data->additionalLevel[i].myCampaignCleared = FALSE;
+    }
+
+    for (i = 0; i < TOTAL_PERFECT_CAMPAIGNS_ADDI; i++) {
+        data->additionalCampaignsCleared[i] = FALSE;
+    }
+}
 
 // [func_080102f4] Reset Rhythm Tengoku Game Save Data
 void reset_game_save_data(void) {
@@ -36,14 +62,14 @@ void reset_game_save_data(void) {
     data->unkB0 = 0;
     data->recentLevelScore = DEFAULT_LEVEL_SCORE;
 
-    for (i = 0; i < TOTAL_LEVELS; i++) {
+    for (i = 0; i < TOTAL_LEVELS_ORIG; i++) {
         data->levelStates[i] = LEVEL_STATE_HIDDEN;
         data->levelScores[i] = DEFAULT_LEVEL_SCORE;
     }
 
     unlock_default_studio_songs();
 
-    for (i = 0; i < TOTAL_LEVELS; i++) {
+    for (i = 0; i < TOTAL_LEVELS_ORIG; i++) {
         data->levelTotalPlays[i] = 0;
         data->levelFirstOK[i] = 0;
         data->levelFirstSuperb[i] = 0;
@@ -52,7 +78,7 @@ void reset_game_save_data(void) {
     reset_all_replay_save_data(&data->drumReplaysAlloc);
     data->totalPerfects = 0;
 
-    for (i = 0; i < TOTAL_PERFECT_CAMPAIGNS; i++) {
+    for (i = 0; i < TOTAL_PERFECT_CAMPAIGNS_ORIG; i++) {
         data->campaignsCleared[i] = FALSE;
     }
     data->campaignState = CAMPAIGN_STATE_INACTIVE;
@@ -89,8 +115,10 @@ void reset_game_save_data(void) {
     data->drumKitsUnlocked[STUDIO_DRUM_STANDARD] = TRUE;
     data->readingMaterialUnlocked[READING_MATERIAL_WELCOME] = TRUE;
     data->readingMaterialUnlocked[READING_MATERIAL_MANUAL] = TRUE;
-}
 
+    // CONHLEE
+    reset_game_save_data_extr();
+}
 
 // [func_08010478] Bulk Copy to Rhythm Tengoku Game Save Data
 void write_game_save_data(void) {
