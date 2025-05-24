@@ -33,7 +33,7 @@ void reset_game_save_data_extr(void) {
         data->additionalLevel[i].uScore.asU8[0] = (u8)(DEFAULT_LEVEL_SCORE & 0xFF);
         data->additionalLevel[i].uScore.asU8[1] = (u8)((DEFAULT_LEVEL_SCORE >> 8) & 0xFF);
 
-        data->additionalLevel[i].state = LEVEL_STATE_OPEN;
+        data->additionalLevel[i].state = LEVEL_STATE_CLOSED;
 
         data->additionalLevel[i].totalPlays = 0;
         data->additionalLevel[i].firstOK = 0;
